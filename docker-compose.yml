@@ -6,58 +6,81 @@ services:
     image: telegraf
     container_name: "telegraf"
     network_mode: "bridge"
-    ports:
-      - "161:161"
+#    ports:
+#      - "161:161"
     environment:
       HOST_PROC: /rootfs/proc
       HOST_SYS: /rootfs/sys
       HOST_ETC: /rootfs/etc
-      TEL_AGENT_HOSTNAME: hostname = "asgard.local"
-      TEL_OUTPUTS_INFLUXDB_0: "[[outputs.influxdb]]"
-      TEL_OUTPUTS_INFLUXDB_URLS: urls = ["http://influxdb.asgard.local"]
-      TEL_INPUTS_KERNEL_0: "[[inputs.kernel]]"
-      TEL_INPUTS_MEM_0: "[[inputs.mem]]"
-      TEL_INPUTS_SWAP_0: "[[inputs.swap]]"
-      TEL_INPUTS_PROCESSES_0: "[[inputs.processes]]"
-      TEL_INPUTS_SYSTEM_0: "[[inputs.system]]"
-      TEL_INPUTS_DISK_0: "[[inputs.disk]]"
-      TEL_INPUTS_DISKIO_0: "[[inputs.diskio]]"
-      TEL_INPUTS_NET_0: "[[inputs.net]]"
-      TEL_INPUTS_NETSTAT_0: "[[inputs.netstat]]"
     volumes:
       - "/proc:/rootfs/proc:ro"
       - "/sys:/rootfs/sys:ro"
       - "/etc:/rootfs/etc:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro" #get docker metrics
-      - "/home/abacus/docker_compose/tig/conf/telegraf:/etc/telegraf:ro" #config
-      - "/usr/share/snmp/mibs:/usr/share/snmp/mibs:ro" #snmp package tables 
+      - "/home/abacus/docker_compose/tig/conf/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro" #config
+      #- "/usr/share/snmp/mibs:/usr/share/snmp/mibs:ro" #snmp package tables 
       #- "/var/run/docker.sock:/var/run/docker.sock:ro"
     #cpu_percent: 1
     #mem_limit: 50m
     restart: always
-  
+
   influxdb:
-    image: drpsychick/influxdb
-    container_name: "influsdb"
-    network_mode: "bridge"
-    environment:
-      IFX_GLOBAL: reporting-disabled = true
-      INFLUXDB_HTTP_BIND_ADDRESS: ":8086"
-    ports:
-      #- 8086:8086
-      - 8089:8089/udp
-    expose:
-      - "8086"
+    image: influxdb:latest
     volumes:
-      - "influxdb:/var/lib/influxdb"
-    #cpu_percent: 50
-    #mem_limit: 1g
-    restart: always
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.influxdb.loadbalancer.server.port=8086"
-      - "traefik.http.routers.influxdb.rule=Host(`influxdb.asgard.local`)"
-      - "traefik.http.routers.influxdb.entrypoints=web"
+      # Mount for influxdb data directory and configuration
+      - influxdb2:/var/lib/influxdb2:rw
+    ports:
+      - "8086:8086"
+  # Use the influx cli to set up an influxdb instance. 
+  influxdb_cli:
+    links:
+      - influxdb
+    image: influxdb:latest
+    volumes:
+      # Mount for influxdb data directory and configuration
+      - influxdb2:/var/lib/influxdb2:rw
+      #- ./ssl/influxdb-selfsigned.crt:/etc/ssl/influxdb-selfsigned.crt:rw
+      #- ./ssl/influxdb-selfsigned.key:/etc/ssl/influxdb-selfsigned.key:rw
+    environment: 
+       # Use these same configurations parameters in your telegraf configuration, mytelegraf.conf.
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUX_USER}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUX_PASS}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUX_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUX_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUX_TOKEN}
+      #- INFLUXD_TLS_CERT=/etc/ssl/influxdb-selfsigned.crt
+      #- INFLUXD_TLS_KEY=/etc/ssl/influxdb-selfsigned.key
+    entrypoint: ["./entrypoint.sh"]
+    restart: on-failure:10
+    depends_on:
+      - influxdb
+
+
+
+
+  # influxdb:
+  #   image: influxdb:latest
+  #   container_name: "influsdb"
+  #   network_mode: "bridge"
+  #   environment:
+  #     IFX_GLOBAL: reporting-disabled = true
+  #     INFLUXDB_HTTP_BIND_ADDRESS: ":8086"
+  #   ports:
+  #     #- 8086:8086
+  #     - 8089:8089/udp
+  #   expose:
+  #     - "8086"
+  #   volumes:
+  #     - "influxdb:/var/lib/influxdb"
+  #   #cpu_percent: 50
+  #   #mem_limit: 1g
+  #   restart: always
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.services.influxdb.loadbalancer.server.port=8086"
+  #     - "traefik.http.routers.influxdb.rule=Host(`influxdb.asgard.local`)"
+  #     - "traefik.http.routers.influxdb.entrypoints=web"
 
   grafana:
     image: grafana/grafana
@@ -79,5 +102,6 @@ services:
       - "traefik.http.routers.grafana.entrypoints=web"
 
 volumes:
-  influxdb:
+  #influxdb:
   grafana:
+  influxdb2:
