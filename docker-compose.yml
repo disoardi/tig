@@ -5,6 +5,7 @@ services:
     #image: drpsychick/telegraf
     image: telegraf
     container_name: "telegraf"
+    privileged: true
     network_mode: "bridge"
 #    ports:
 #      - "161:161"
