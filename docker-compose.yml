@@ -77,7 +77,7 @@ services:
     network_mode: "bridge"
     #environment:
       #GF_INSTALL_PLUGINS: # plugins to install
-    port:
+    ports:
       - "3000:3000"
     volumes:
       - "grafana:/var/lib/grafana"
