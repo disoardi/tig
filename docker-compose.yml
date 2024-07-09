@@ -18,7 +18,7 @@ services:
       - "/etc:/rootfs/etc:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro" #get docker metrics
       - "/home/abacus/Progetti/tig/conf/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro" #config
-      #- "/usr/share/snmp/mibs:/usr/share/snmp/mibs:ro" #snmp package tables 
+      - "/usr/share/snmp/mibs:/usr/share/snmp/mibs:ro" #snmp package tables 
       #- "/var/run/docker.sock:/var/run/docker.sock:ro"
     #cpu_percent: 1
     #mem_limit: 50m

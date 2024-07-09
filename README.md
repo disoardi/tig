@@ -2,6 +2,10 @@
 
 This env share the same network with other projects for enabling traefik routing.
 
+## Pre-req.
+
+`sudo apt-get install snmp libsnmp-base snmp-mibs-downloader`
+
 ## Install
 
 
