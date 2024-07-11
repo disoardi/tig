@@ -12,14 +12,20 @@ This env share the same network with other projects for enabling traefik routing
 
 ## ToDo
 
+[ ] All config with variables, also for telegraf configuration files
+[ ] InfluxDB first setup
+[ ] Compose only for agent deploy
+
 ## Authors
 
 Contributors names and contact info
 
-Davide Isoardi abacus@linux.it or business mail davide.isoardi@valuepartners.com
+Davide Isoardi abacus@linux.it or mail davide@isoardi.info
 
 ## Version History
 
+* 0.2
+    * variable for configuration
 * 0.1
     * deploy base infrastructure
     * define first telegraf configuration   
