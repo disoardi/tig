@@ -16,6 +16,7 @@ services:
       INFLUX_TOKEN: ${INFLUX_TOKEN}
       INFLUX_ORG: ${INFLUX_ORG}
       INFLUX_BUCKET: ${INFLUX_BUCKET}
+      INFLUX_URL: ${INFLUX_URL}
     volumes:
       - "/proc:/rootfs/proc:ro"
       - "/sys:/rootfs/sys:ro"
@@ -84,11 +85,11 @@ services:
     #cpu_percent: 1
     #mem_limit: 200m
     restart: always
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
-      - "traefik.http.routers.grafana.rule=Host(`grafana.asgard.local`)"
-      - "traefik.http.routers.grafana.entrypoints=web"
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    #   - "traefik.http.routers.grafana.rule=Host(`grafana.asgard.local`)"
+    #   - "traefik.http.routers.grafana.entrypoints=web"
 
 volumes:
   #influxdb:
